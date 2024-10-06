@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Mail Management</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* جعل شريط المهام ثابتًا */
+        .navbar {
+            position: fixed;
+            width: 100%;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+            /* تأكد من أن شريط المهام فوق باقي العناصر */
+        }
+
+        /* إضافة مساحة في أعلى الصفحة لتفادي تداخل المحتوى */
+        body {
+            padding-top: 70px;
+            /* تعديل المسافة بحسب ارتفاع شريط المهام */
+        }
+
+        .nav-link:hover {
+            color: rgb(19, 19, 130);
+            /* لون مختلف عند التمرير على الرابط */
+        }
+    </style>
+    <script>
+        function handleLogin(event) {
+            event.preventDefault(); // منع الإرسال الافتراضي للنموذج
+
+            // احصل على قيم البريد الإلكتروني وكلمة المرور
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            // هنا يمكنك إضافة منطق التحقق من صحة البريد الإلكتروني وكلمة المرور
+            // إذا كانت صحيحة، قم بإعادة توجيه المستخدم إلى inbox.html
+            if (email && password) {
+                // إعادة التوجيه إلى inbox.html
+                window.location.href = "inbox.html";
+            } else {
+                alert('Please enter valid email and password.');
+            }
+        }
+    </script>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container-fluid">
+            <a class="navbar-brand"><img src="Adetic.png" alt="" width="100px"></a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html" style="color: rgb(19, 19, 130)">info page </i></a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="signup.html">Sign Up <i class="fas fa-user-plus"></i></a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <h1>Login</h1>
+        <form onsubmit="handleLogin(event)">
+            <div class="mb-3">
+                <label for="email" class="form-label">Email address</label>
+                <input type="email" class="form-control" id="email" required>
+            </div>
+            <div class="mb-3">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" class="form-control" id="password" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Login</button>
+        </form>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

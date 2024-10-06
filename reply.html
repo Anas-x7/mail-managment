@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ar">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reply to Message</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* جعل شريط المهام ثابتًا */
+        .navbar {
+            position: fixed;
+            width: 100%;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+            /* تأكد من أن شريط المهام فوق باقي العناصر */
+        }
+
+        /* إضافة مساحة في أعلى الصفحة لتفادي تداخل المحتوى */
+        body {
+            padding-top: 70px;
+            /* تعديل المسافة بحسب ارتفاع شريط المهام */
+        }
+
+        .nav-link:hover {
+            color: rgb(19, 19, 130);
+            /* لون مختلف عند التمرير على الرابط */
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container-fluid">
+            <a class="navbar-brand"><img src="Adetic.png" alt="" width="100px"></a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="inbox.html">Inbox <i class="fas fa-envelope"></i></a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="sent.html">Sent <i class="fas fa-paper-plane"></i></a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="archive.html">Archive <i class="fas fa-archive"></i></a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="compose.html">Compose <i class="fas fa-pencil-alt"></i></a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="confirmLogout(event)">Logout <i
+                                class="fas fa-sign-out-alt"></i></a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <h1>Reply to Message</h1>
+        <form id="replyForm">
+            <div class="mb-3">
+                <label for="recipient" class="form-label">To</label>
+                <input type="text" class="form-control" id="recipient" readonly>
+            </div>
+            <div class="mb-3">
+                <label for="subject" class="form-label">Subject</label>
+                <input type="text" class="form-control" id="subject" readonly>
+            </div>
+            <div class="mb-3">
+                <label for="message" class="form-label">Your Message</label>
+                <textarea class="form-control" id="message" rows="5" required></textarea>
+            </div>
+            <div class="mb-3">
+                <label for="attachment">Files <i class="fas fa-file pb-2"></i></label><br>
+                <input type="file" id="attachment" name="attachment" multiple>
+            </div>
+            <button type="submit" class="btn btn-primary">Send</button>
+        </form>
+    </div>
+
+    <div style="margin-bottom: 100px;"></div> <!-- مساحة إضافية تحت النموذج -->
+
+    <script>
+        // جلب بيانات الرسالة من localStorage وإدخالها في النموذج
+        const urlParams = new URLSearchParams(window.location.search);
+        const messageId = urlParams.get('id');
+        const emailData = JSON.parse(localStorage.getItem('emailData')) || [];
+        const message = emailData.find(email => email.id == messageId);
+        if (message) {
+            document.getElementById('recipient').value = message.recipient;
+            document.getElementById('subject').value = 'Re: ' + message.subject;
+        }
+
+        document.getElementById('replyForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+            const replyMessage = document.getElementById('message').value;
+
+            // تخزين الرسالة في localStorage
+            const sentEmails = JSON.parse(localStorage.getItem('sentEmails')) || [];
+            const newEmail = {
+                recipient: document.getElementById('recipient').value,
+                subject: document.getElementById('subject').value,
+                message: replyMessage,
+                dateSent: new Date().toLocaleString()
+            };
+            sentEmails.push(newEmail);
+            localStorage.setItem('sentEmails', JSON.stringify(sentEmails));
+
+            // إفراغ محتويات النموذج
+            document.getElementById('message').value = '';
+            alert('Reply sent: ' + replyMessage);
+        });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>
