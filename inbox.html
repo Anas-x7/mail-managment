@@ -33,26 +33,20 @@
             padding-bottom: 100px;
         }
 
-        /* جعل شريط المهام ثابتًا */
         .navbar {
             position: fixed;
             width: 100%;
             top: 0;
             left: 0;
             z-index: 1000;
-            /* تأكد من أن شريط المهام فوق باقي العناصر */
         }
 
-        /* إضافة مساحة في أعلى الصفحة لتفادي تداخل المحتوى */
         body {
             padding-top: 70px;
-            /* تعديل المسافة بحسب ارتفاع شريط المهام */
         }
-
 
         .nav-link:hover {
             color: rgb(19, 19, 130);
-            /* لون مختلف عند التمرير على الرابط */
         }
     </style>
 </head>
@@ -85,13 +79,37 @@
                                 class="fas fa-trash"></i></a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="showPersonalInfo()">
+                            <i class="fas fa-user"></i>
+                        </a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link" href="#" onclick="confirmLogout(event)">Logout <i
                                 class="fas fa-sign-out-alt"></i></a>
                     </li>
+
                 </ul>
             </div>
         </div>
     </nav>
+    <!-- نافذة منبثقة لمعلومات المستخدم -->
+    <div class="modal fade" id="infoModal" tabindex="-1" aria-labelledby="infoModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="infoModalLabel">Profile</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="infoModalBody">
+                    <!-- معلومات المستخدم سيتم تحميلها هنا -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 
     <div class="container mt-5">
         <h1>Your Inbox</h1>
@@ -99,42 +117,19 @@
     </div>
 
     <script>
+
         function confirmLogout(event) {
             event.preventDefault();
             const confirmed = confirm("هل أنت متأكد أنك تريد تسجيل الخروج؟");
             if (confirmed) {
-                window.location.href = "logout.html";
+                localStorage.removeItem('loggedIn'); // حذف فقط حالة تسجيل الدخول
+                window.location.href = "index.html"; // إعادة التوجيه إلى الصفحة الرئيسية
             }
         }
-        const sampleEmails = [
-            {
-                id: 1,
-                subject: "مرحبا!",
-                recipient: "user@example.com",
-                message: "كيف حالك اليوم؟",
-                file: null,
-                receivedDate: "2024-10-01",
 
-            },
-            {
-                id: 2,
-                subject: "تذكير بالاجتماع",
-                recipient: "user@example.com",
-                message: "لا تنسى الاجتماع غدًا الساعة 10 صباحًا.",
-                file: "agenda.pdf",
-                receivedDate: "2024-09-29",
 
-            },
-            {
-                id: 3,
-                subject: "عرض الأسعار",
-                recipient: "user@example.com",
-                message: "يرجى مراجعة عرض الأسعار المرفق.",
-                file: "quotation.pdf",
-                receivedDate: "2024-09-28",
 
-            }
-        ];
+
 
         localStorage.setItem('emailData', JSON.stringify(sampleEmails));
 
@@ -147,27 +142,25 @@
                     emailItem.classList.add('list-group-item', 'message-preview');
                     emailItem.setAttribute('data-id', email.id);
                     emailItem.innerHTML = `
-<h5>${email.subject}</h5>
-<p>From: ${email.recipient}</p>
-<span class="message-date">تاريخ الاستلام: ${email.receivedDate} </span>
-<div class="message-actions">
-<button class="btn btn-info btn-sm" onclick="replyToMessage(${email.id})">رد</button>
-<button class="btn btn-secondary btn-sm" onclick="moveToTrash(${email.id})">نقل إلى سلة المهملات <i class="fas fa-trash"></i></button>
-<button class="btn btn-warning btn-sm" onclick="archiveMessage(${email.id})">أرشفة <i class="fas fa-archive"></i></button>
-</div>
-`;
+                        <h5>${email.subject}</h5>
+                        <p>From: ${email.recipient}</p>
+                        <span class="message-date">تاريخ الاستلام: ${email.receivedDate}</span>
+                        <div class="message-actions">
+                            <button class="btn btn-info btn-sm" onclick="replyToMessage(${email.id})">رد</button>
+                            <button class="btn btn-secondary btn-sm" onclick="moveToTrash(${email.id})">نقل إلى سلة المهملات <i class="fas fa-trash"></i></button>
+                            <button class="btn btn-warning btn-sm" onclick="archiveMessage(${email.id})">أرشفة <i class="fas fa-archive"></i></button>
+                        </div>
+                    `;
                     emailItem.addEventListener('click', function () {
                         const isExpanded = emailItem.classList.toggle('expanded');
                         if (isExpanded) {
                             emailItem.innerHTML += `
-<p>${email.message}</p>
-${email.file ? `<p>ملف مرفق: ${email.file}</p>` : ''}
-`;
+                                <p>${email.message}</p>
+                                ${email.file ? `<p>ملف مرفق: ${email.file}</p>` : ''}
+                            `;
                         } else {
-                            const messageContent = emailItem.querySelector('p:last-child');
-                            if (messageContent) {
-                                messageContent.remove();
-                            }
+                            const extraContent = emailItem.querySelectorAll('p:not(.message-date):not(:first-of-type)');
+                            extraContent.forEach(content => content.remove());
                         }
                     });
                     emailList.appendChild(emailItem);
@@ -194,10 +187,12 @@ ${email.file ? `<p>ملف مرفق: ${email.file}</p>` : ''}
         function archiveMessage(messageId) {
             let emailData = JSON.parse(localStorage.getItem('emailData')) || [];
             const emailToArchive = emailData.find(email => email.id === messageId);
+
             if (emailToArchive) {
                 let archiveData = JSON.parse(localStorage.getItem('archivedEmails')) || [];
                 archiveData.push(emailToArchive);
                 localStorage.setItem('archivedEmails', JSON.stringify(archiveData));
+
                 emailData = emailData.filter(email => email.id !== messageId);
                 localStorage.setItem('emailData', JSON.stringify(emailData));
                 location.reload();
@@ -210,17 +205,37 @@ ${email.file ? `<p>ملف مرفق: ${email.file}</p>` : ''}
 
         function removeExpiredEmails() {
             const currentTime = new Date().getTime();
-            let trashData = JSON.parse(localStorage.getItem('deletedEmails')) || [];
 
+            let trashData = JSON.parse(localStorage.getItem('deletedEmails')) || [];
             trashData = trashData.filter(email => {
                 const emailTime = email.dateMoved || 0;
-                return (currentTime - emailTime) <= 30 * 24 * 60 * 60 * 1000; // 30 days
+                return (currentTime - emailTime) <= 30 * 24 * 60 * 60 * 1000; // 30 يومًا
             });
             localStorage.setItem('deletedEmails', JSON.stringify(trashData));
         }
+        function showPersonalInfo() {
+            const accountInfo = JSON.parse(localStorage.getItem('accounts')) || [];
+            const lastAccount = accountInfo[accountInfo.length - 1]; // الحصول على آخر حساب تم إنشاؤه
+            const infoModalBody = document.getElementById('infoModalBody');
+
+            if (lastAccount) {
+                infoModalBody.innerHTML = `
+                    <p><strong> Name :</strong> ${lastAccount.name}</p>
+                    <p><strong> Email :</strong> ${lastAccount.email}</p>
+                    <p><strong> Number :</strong> ${lastAccount.phone}</p>
+                    <p><strong> Address :</strong> ${lastAccount.address}</p>
+                `;
+            } else {
+                infoModalBody.innerHTML = `<p>لا توجد معلومات شخصية.</p>`;
+            }
+
+            // إظهار النافذة المنبثقة
+            const infoModal = new bootstrap.Modal(document.getElementById('infoModal'));
+            infoModal.show();
+        }
+
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
 </body>
 
 </html>

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar">
 
 <head>
     <meta charset="UTF-8">
@@ -16,37 +16,45 @@
             top: 0;
             left: 0;
             z-index: 1000;
-            /* تأكد من أن شريط المهام فوق باقي العناصر */
         }
 
         /* إضافة مساحة في أعلى الصفحة لتفادي تداخل المحتوى */
         body {
             padding-top: 70px;
-            /* تعديل المسافة بحسب ارتفاع شريط المهام */
         }
 
         .nav-link:hover {
             color: rgb(19, 19, 130);
-            /* لون مختلف عند التمرير على الرابط */
         }
     </style>
     <script>
         function handleLogin(event) {
             event.preventDefault(); // منع الإرسال الافتراضي للنموذج
 
-            // احصل على قيم البريد الإلكتروني وكلمة المرور
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
 
-            // هنا يمكنك إضافة منطق التحقق من صحة البريد الإلكتروني وكلمة المرور
-            // إذا كانت صحيحة، قم بإعادة توجيه المستخدم إلى inbox.html
-            if (email && password) {
-                // إعادة التوجيه إلى inbox.html
-                window.location.href = "inbox.html";
+            // استرجاع معلومات الحساب من localStorage
+            const accounts = JSON.parse(localStorage.getItem('accounts')) || [];
+
+            // تحقق من صحة البريد الإلكتروني وكلمة المرور
+            const account = accounts.find(acc => acc.email === email && acc.password === password);
+            if (account) {
+                localStorage.setItem('loggedIn', true); // حفظ حالة تسجيل الدخول
+                alert('Login successful!');
+                window.location.href = "inbox.html"; // الانتقال إلى صفحة الوارد
             } else {
-                alert('Please enter valid email and password.');
+                alert('Incorrect email or password');
             }
         }
+
+        // التحقق مما إذا كان المستخدم قد سجل الدخول مسبقًا
+        window.onload = function () {
+            const loggedIn = localStorage.getItem('loggedIn');
+            if (loggedIn) {
+                window.location.href = "inbox.html"; // الانتقال إلى صفحة الوارد
+            }
+        };
     </script>
 </head>
 
@@ -61,7 +69,7 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="index.html" style="color: rgb(19, 19, 130)">info page </i></a>
+                        <a class="nav-link" href="index.html" style="color: rgb(19, 19, 130)">info page </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="signup.html">Sign Up <i class="fas fa-user-plus"></i></a>

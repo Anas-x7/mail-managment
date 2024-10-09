@@ -32,12 +32,11 @@
     </style>
     <script>
         function confirmLogout(event) {
-            event.preventDefault(); // منع الإجراء الافتراضي للرابط
-
-            // عرض نافذة تأكيد
-            const confirmed = confirm("Are you sure you want to log out?");
+            event.preventDefault();
+            const confirmed = confirm("هل أنت متأكد أنك تريد تسجيل الخروج؟");
             if (confirmed) {
-                window.location.href = "logout.html"; // إعادة التوجيه إلى logout.html إذا أكد المستخدم
+                localStorage.removeItem('loggedIn'); // حذف فقط حالة تسجيل الدخول
+                window.location.href = "index.html"; // إعادة التوجيه إلى الصفحة الرئيسية
             }
         }
 
@@ -49,21 +48,56 @@
             const subject = document.getElementById('subject').value;
             const message = document.getElementById('message').value;
 
-            // حفظ البيانات في localStorage
-            const sentEmails = JSON.parse(localStorage.getItem('sentEmails')) || [];
-            sentEmails.push({
-                subject: subject,
-                message: message,
-                recipient: recipientEmail,
-                dateSent: new Date().toISOString().split('T')[0] // حفظ تاريخ الإرسال
+            // التعامل مع المرفقات
+            const attachmentInput = document.getElementById('attachment');
+            const attachments = Array.from(attachmentInput.files).map(file => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file); // قراءة محتوى الملف كـ Data URL
+                return new Promise((resolve) => {
+                    reader.onload = () => {
+                        resolve(reader.result); // حفظ المحتوى عند الانتهاء
+                    };
+                });
             });
-            localStorage.setItem('sentEmails', JSON.stringify(sentEmails));
 
-            // إعادة تعيين النموذج بعد الإرسال
-            document.querySelector('form').reset();
+            Promise.all(attachments).then((attachmentURLs) => {
+                // حفظ البيانات في localStorage
+                const sentEmails = JSON.parse(localStorage.getItem('sentEmails')) || [];
+                sentEmails.push({
+                    subject: subject,
+                    message: message,
+                    recipient: recipientEmail,
+                    dateSent: new Date().toISOString().split('T')[0], // حفظ تاريخ الإرسال
+                    attachments: attachmentURLs // حفظ المرفقات
+                });
+                localStorage.setItem('sentEmails', JSON.stringify(sentEmails));
 
-            // عرض رسالة تأكيد أو أي إجراء آخر
-            alert('تم إرسال الرسالة بنجاح!');
+                // إعادة تعيين النموذج بعد الإرسال
+                document.querySelector('form').reset();
+
+                // عرض رسالة تأكيد أو أي إجراء آخر
+                alert('تم إرسال الرسالة بنجاح!');
+            });
+        }
+        function showPersonalInfo() {
+            const accountInfo = JSON.parse(localStorage.getItem('accounts')) || [];
+            const lastAccount = accountInfo[accountInfo.length - 1]; // الحصول على آخر حساب تم إنشاؤه
+            const infoModalBody = document.getElementById('infoModalBody');
+
+            if (lastAccount) {
+                infoModalBody.innerHTML = `
+                    <p><strong> Name :</strong> ${lastAccount.name}</p>
+                    <p><strong> Email :</strong> ${lastAccount.email}</p>
+                    <p><strong> Number :</strong> ${lastAccount.phone}</p>
+                    <p><strong> Address :</strong> ${lastAccount.address}</p>
+                `;
+            } else {
+                infoModalBody.innerHTML = `<p>لا توجد معلومات شخصية.</p>`;
+            }
+
+            // إظهار النافذة المنبثقة
+            const infoModal = new bootstrap.Modal(document.getElementById('infoModal'));
+            infoModal.show();
         }
     </script>
 </head>
@@ -97,13 +131,35 @@
                                 class="fas fa-trash"></i></a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#" onclick="confirmLogout(event)">Logout <i
+                        <a class="nav-link" href="#" onclick="showPersonalInfo()">
+                            <i class="fas fa-user"></i>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="logout.html" onclick="confirmLogout(event)">Logout <i
                                 class="fas fa-sign-out-alt"></i></a>
                     </li>
                 </ul>
             </div>
         </div>
     </nav>
+    <!-- نافذة منبثقة لمعلومات المستخدم -->
+    <div class="modal fade" id="infoModal" tabindex="-1" aria-labelledby="infoModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="infoModalLabel">Profile</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="infoModalBody">
+                    <!-- معلومات المستخدم سيتم تحميلها هنا -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <div class="container mt-5 pb-5">
         <h1>Compose New Email</h1>
